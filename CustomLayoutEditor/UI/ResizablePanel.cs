@@ -288,6 +288,14 @@ internal class ResizablePanel : Panel
             Height = UnitsToTileSize((int)Math.Round(SizeToTileUnits(size.Height)))
         };
     }
+    internal static Size CeilToTileUnits(Size size)
+    {
+        return new()
+        {
+            Width = UnitsToTileSize((int)Math.Ceiling(SizeToTileUnits(size.Width))),
+            Height = UnitsToTileSize((int)Math.Ceiling(SizeToTileUnits(size.Height)))
+        };
+    }
 
     internal static Point RoundToSize(Point point)
     {
@@ -411,6 +419,7 @@ internal class ResizablePanel : Panel
             if (e.Button != MouseButtons.Right) return;
             new ContextMenuBuilder().AddItem("Detach to Window", (_, _) => _form.SwitchToWindow())
                 .AddItem("Remove", Remove)
+                .AddItem("Delete", (_, _) => Delete())
                 .BeginSubMenu("Edit Anchor Values")
                 .AddItem("Left", (_, _) => Anchor ^= AnchorStyles.Left,
                     isChecked: Anchor.Contains(AnchorStyles.Left))

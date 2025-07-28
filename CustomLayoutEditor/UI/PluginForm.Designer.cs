@@ -83,10 +83,11 @@
             this.Controls.Add(this.lbVersion);
             this.Controls.Add(this.lbTitle);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.MinimumSize = new System.Drawing.Size(310, 200);
             this.Name = "PluginForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Tag = "color:dark1";
-            this.Text = "Custom Layout Editor ";
+            this.Text = "Custom Layout Editor";
             this.ResumeLayout(false);
             this.PerformLayout();
 

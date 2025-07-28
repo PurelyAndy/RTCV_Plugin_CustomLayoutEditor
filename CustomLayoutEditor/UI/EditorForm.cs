@@ -36,45 +36,8 @@ public partial class EditorForm : ColorizedForm
             Dock = DockStyle.Fill
         };
         _root.AllowDrop = true;
-        _root.DragEnter += (_, e) =>
-        {
-            if (e.Data.GetDataPresent(DataFormats.StringFormat))
-            {
-                e.Effect = DragDropEffects.Copy;
-            }
-            else
-            {
-                e.Effect = DragDropEffects.None;
-            }
-        };
-        _root.DragDrop += (_, e) =>
-        {
-            if (!e.Data.GetDataPresent(DataFormats.StringFormat))
-                return;
-            
-            ResizablePanel panel = new(_root);
-            _root.Controls.Add(panel);
-            panel.Location = _root.PointToClient(Cursor.Position);
-            panel.Location = ResizablePanel.RoundToSize(panel.Location) + new Size(ResizablePanel.BorderSize, ResizablePanel.BorderSize);
-            string typeName = (string)e.Data.GetData(DataFormats.StringFormat);
-            if (typeName == "MemoryTools")
-            {
-                panel.ApplyWithTile(UICore.mtForm);
-                panel.Size = ResizablePanel.RoundToTileUnits(UICore.mtForm.Size);
-                return;
-            }
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                Type type = assembly.GetType(typeName);
-                if (type != null && type.IsSubclassOf(typeof(ComponentForm)))
-                {
-                    var gotten = (ComponentForm)S.GET(type);
-                    panel.ApplyWithTile(gotten);
-                    panel.Size = ResizablePanel.RoundToTileUnits(gotten.Size);
-                    return;
-                }
-            }
-        };
+        _root.DragEnter += RootDragEnter;
+        _root.DragDrop += RootDragDrop;
         
         InitializeComponent();
         pnGridContainer.Padding = new(16 - ResizablePanel.BorderSize);
@@ -104,6 +67,62 @@ public partial class EditorForm : ColorizedForm
         ResetGrid();
         pnGridContainer.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
         pnGridContainer.Dock = DockStyle.Fill;
+    }
+
+    private void RootDragDrop(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.StringFormat))
+            return;
+        
+        ResizablePanel panel = new(_root);
+        _root.Controls.Add(panel);
+        panel.Location = _root.PointToClient(Cursor.Position);
+        panel.Location = ResizablePanel.RoundToSize(panel.Location) + new Size(ResizablePanel.BorderSize, ResizablePanel.BorderSize);
+        string typeName = (string)e.Data.GetData(DataFormats.StringFormat);
+        ComponentForm droppedForm = null;
+        if (typeName == "MemoryTools")
+        {
+            droppedForm = UICore.mtForm;
+        }
+        else
+        {
+            bool found = false;
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                Type type = assembly.GetType(typeName);
+                if (type != null && type.IsSubclassOf(typeof(ComponentForm)))
+                {
+                    droppedForm = (ComponentForm)S.GET(type);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                return;
+        }
+        
+        panel.ApplyWithTile(droppedForm);
+        // y + 24 to account for the title bar height
+        Size roundedMin = ResizablePanel.CeilToTileUnits(droppedForm.MinimumSize + new Size(0, 24));
+        int oneUnit = ResizablePanel.UnitsToTileSize(1);
+        int fourUnits = ResizablePanel.UnitsToTileSize(4);
+        if (roundedMin.Width < oneUnit)
+            roundedMin.Width = fourUnits;
+        if (roundedMin.Height < oneUnit)
+            roundedMin.Height = fourUnits;
+        panel.Size = roundedMin;
+    }
+
+    private static void RootDragEnter(object sender, DragEventArgs e)
+    {
+         if (e.Data.GetDataPresent(DataFormats.StringFormat))
+         {
+             e.Effect = DragDropEffects.Copy;
+         }
+         else
+         {
+             e.Effect = DragDropEffects.None;
+         }
     }
 
     private void ResetGrid()
