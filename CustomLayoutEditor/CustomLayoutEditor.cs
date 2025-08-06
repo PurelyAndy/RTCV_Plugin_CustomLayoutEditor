@@ -14,7 +14,7 @@ public class CustomLayoutEditor : IPlugin
     public string Name => "Custom Layout Editor";
     public string Description => "Allows you to edit the layout of the RTC UI.";
     public string Author => "PurelyAndy";
-    public Version Version => new(0, 0, 1);
+    public Version Version => new(1, 0, 0);
     public RTCSide SupportedSide => RTCSide.Server;
     public static PluginForm PluginForm;
     public static CustomLayoutEditor Instance { get; private set; }
