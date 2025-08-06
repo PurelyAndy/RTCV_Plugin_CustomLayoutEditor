@@ -224,8 +224,13 @@ internal class ResizablePanel : Panel
         if (e.Button != MouseButtons.Right) return;
         if (sender is ResizablePanel panel)
         {
+            if (panel._form is not null)
+            {
+                MakeContextMenu(panel, e);
+                return;
+            }
             new ContextMenuBuilder()
-                .If(!panel._topLevel).AddItem("Remove", Remove).EndIf()
+                .If(!panel._topLevel).AddItem("Delete", Remove).EndIf()
                 .BeginSubMenu("Edit Anchor Values")
                 .AddItem("Left", (_, _) => Anchor ^= AnchorStyles.Left,
                     isChecked: Anchor.Contains(AnchorStyles.Left))
@@ -413,25 +418,25 @@ internal class ResizablePanel : Panel
                 Math.Min(Math.Max(this.Location.Y + e.Y - mouseDownAt.Y, 0), _parent.Height - Height - BorderSize * 2)
             )) + new Size(BorderSize, BorderSize);
         }
+    }
 
-        void MakeContextMenu(object o, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Right) return;
-            new ContextMenuBuilder().AddItem("Detach to Window", (_, _) => _form.SwitchToWindow())
-                .AddItem("Remove", Remove)
-                .AddItem("Delete", (_, _) => Delete())
-                .BeginSubMenu("Edit Anchor Values")
-                .AddItem("Left", (_, _) => Anchor ^= AnchorStyles.Left,
-                    isChecked: Anchor.Contains(AnchorStyles.Left))
-                .AddItem("Right", (_, _) => Anchor ^= AnchorStyles.Right,
-                    isChecked: Anchor.Contains(AnchorStyles.Right))
-                .AddItem("Top", (_, _) => Anchor ^= AnchorStyles.Top,
-                    isChecked: Anchor.Contains(AnchorStyles.Top))
-                .AddItem("Bottom", (_, _) => Anchor ^= AnchorStyles.Bottom,
-                    isChecked: Anchor.Contains(AnchorStyles.Bottom))
-                .EndSubMenu()
-                .Build()
-                .Show((Control)o, this.PointToClient(Cursor.Position));
-        }
+    private void MakeContextMenu(object o, MouseEventArgs e)
+    {
+        if (e.Button != MouseButtons.Right) return;
+        new ContextMenuBuilder().AddItem("Detach to Window", (_, _) => _form.SwitchToWindow())
+            .AddItem("Remove", Remove)
+            .AddItem("Delete", (_, _) => Delete())
+            .BeginSubMenu("Edit Anchor Values")
+            .AddItem("Left", (_, _) => Anchor ^= AnchorStyles.Left,
+                isChecked: Anchor.Contains(AnchorStyles.Left))
+            .AddItem("Right", (_, _) => Anchor ^= AnchorStyles.Right,
+                isChecked: Anchor.Contains(AnchorStyles.Right))
+            .AddItem("Top", (_, _) => Anchor ^= AnchorStyles.Top,
+                isChecked: Anchor.Contains(AnchorStyles.Top))
+            .AddItem("Bottom", (_, _) => Anchor ^= AnchorStyles.Bottom,
+                isChecked: Anchor.Contains(AnchorStyles.Bottom))
+            .EndSubMenu()
+            .Build()
+            .Show((Control)o, this.PointToClient(Cursor.Position));
     }
 }
